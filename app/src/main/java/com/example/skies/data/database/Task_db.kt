@@ -16,8 +16,8 @@ data class Task_db(
     @PrimaryKey(autoGenerate = true) @ColumnInfo("uid") val uid: Int,
     @ColumnInfo("title") val title: String,
     @ColumnInfo("task") val task: String,
-    @ColumnInfo("date") val date: LocalDate?,
-    @ColumnInfo("time") val time: LocalTime?,
+    @ColumnInfo("date") val date: String,
+    @ColumnInfo("time") val time: String,
     @ColumnInfo("completed") val completed: Boolean
 )
 
@@ -27,7 +27,7 @@ interface TasksDao{
     @Query("SELECT * FROM Tasks ORDER BY time DESC")
     fun pullAllTasks(): Flow<List<Task_db>>
 
-    @Query("SELECT * FROM Tasks WHERE title = title")
+    @Query("SELECT * FROM Tasks WHERE :title = title")
     fun pullTaskByTitle(title: String): Flow<List<Task_db>>
 
     @Upsert

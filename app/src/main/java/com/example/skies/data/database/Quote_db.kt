@@ -11,16 +11,21 @@ import kotlinx.coroutines.flow.Flow
 
 @Entity(tableName = "Quotes")
 data class Quote_db(
-    @PrimaryKey(autoGenerate = true) @ColumnInfo("uid") val uid: Int,
+    @PrimaryKey(autoGenerate = true) @ColumnInfo("id") val id: Int,
     @ColumnInfo("quote") val quote: String,
-    @ColumnInfo("author") val author: String
+    @ColumnInfo("author") val author: String,
+    @ColumnInfo("date") val date: String,
+    @ColumnInfo("time") val time: String
 )
 
 @Dao
 interface QuotesDao{
 
     @Query("SELECT * FROM Quotes WHERE quote = quote")
-    fun pullQuote(): Flow<List<Quote_db>>
+    suspend fun pullQuote(): Flow<List<Quote_db>>
+
+    @Query("SELECT * FROM Quotes WHERE date = date")
+    suspend fun pullDailyQuotes(): Flow<List<Quote_db>>
 
     @Upsert
     suspend fun upsertQuote(quote: Quote_db)

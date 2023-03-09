@@ -1,7 +1,7 @@
 
 buildscript {
     ext {
-        ktor_version = '2.2.3'
+        ktor_version = '2.2.4'
     }
     repositories {
         // other repositories...

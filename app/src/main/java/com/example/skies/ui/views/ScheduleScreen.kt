@@ -1,6 +1,7 @@
 package com.example.skies.ui.views
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,6 +13,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarVisuals
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -29,10 +32,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun ScheduleScreen(
-    scheduleViewModel: ScheduleViewModel = viewModel(),
-
-) {
+fun ScheduleScreen(scheduleViewModel: ScheduleViewModel) {
 
         ScheduleBody(
             taskList = scheduleViewModel.uiStateFlow,
@@ -88,6 +88,7 @@ fun ScheduleBody(
                 )
             }
         }
+
 
 }
 
@@ -196,5 +197,13 @@ fun SkyPic() {
     AsyncImage(
         model = "",
         contentDescription = ""
+    )
+}
+
+@Composable
+fun ScheduleSnackbar() {
+    Snackbar(
+        content = {  },
+        
     )
 }

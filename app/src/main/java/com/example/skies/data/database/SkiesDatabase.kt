@@ -9,8 +9,9 @@ import javax.inject.Singleton
 
 @Singleton
 @Database(
-    version = 1,
+    version = 2,
     entities = [Quote_db::class, Task_db::class, Picture_db::class],
+    exportSchema = true
 )
 abstract class SkiesDatabase : RoomDatabase() {
 

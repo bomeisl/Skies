@@ -42,7 +42,7 @@ object DatabaseModule {
             appContext,
             SkiesDatabase::class.java,
             "skies.db"
-        ).build()
+        ).fallbackToDestructiveMigration().build()
     }
 
 }

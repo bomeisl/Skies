@@ -17,11 +17,16 @@ import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarData
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -64,19 +69,18 @@ fun HostScreen() {
 
                     composable(Routes.SCHEDULE.name) {
                         ScheduleScreen(
-                            scheduleViewModel = hiltViewModel<ScheduleViewModel>()
+                            scheduleViewModel = hiltViewModel<ScheduleViewModel>(),
+
                         )
                     }
                 }
 
 
             },
+        floatingActionButton = {},
 
         bottomBar = {
             SkiesBottomNavBar()
-        },
-        snackbarHost = {
-            SnackbarHost(hostState = remember { SnackbarHostState() })
         },
         drawerContent = {
 
@@ -109,5 +113,7 @@ fun HostScreen() {
     )
 
 }
+
+
 
 

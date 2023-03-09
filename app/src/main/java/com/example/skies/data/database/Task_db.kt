@@ -13,6 +13,10 @@ import androidx.room.Upsert
 import com.example.skies.ui.viewmodels.Task_ui
 import kotlinx.coroutines.flow.Flow
 
+enum class Importance {
+    ITCANWAIT, IWANTTO, IMPORTANT, URGENT, DOITNOW
+}
+
 @Entity(tableName = "Tasks")
 data class Task_db(
     @PrimaryKey(autoGenerate = true) @ColumnInfo("id") val id: Int,
@@ -20,7 +24,9 @@ data class Task_db(
     @ColumnInfo("task") val task: String = "",
     @ColumnInfo("date") val date: String = "",
     @ColumnInfo("time") val time: String = "",
-    @ColumnInfo("completed") val completed: Boolean = false
+    @ColumnInfo("completed") val completed: Boolean = false,
+    @ColumnInfo("importance") val importance: Importance = Importance.ITCANWAIT,
+    @ColumnInfo("soft_deleted") val soft_deleted: Boolean = false
 )
 
 fun Task_db.toUI(): Task_ui = Task_ui(

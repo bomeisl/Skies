@@ -37,7 +37,7 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideDatabase(@ApplicationContext appContext: Context): SkiesDatabase {
+    fun providesDatabase(@ApplicationContext appContext: Context) : SkiesDatabase {
         return Room.databaseBuilder(
             appContext,
             SkiesDatabase::class.java,

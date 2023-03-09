@@ -22,10 +22,10 @@ data class Quote_db(
 interface QuotesDao{
 
     @Query("SELECT * FROM Quotes WHERE quote = quote")
-    suspend fun pullQuote(): Flow<List<Quote_db>>
+    fun pullQuote(): Flow<List<Quote_db>>
 
     @Query("SELECT * FROM Quotes WHERE date = date")
-    suspend fun pullDailyQuotes(): Flow<List<Quote_db>>
+    fun pullDailyQuotes(): Flow<List<Quote_db>>
 
     @Upsert
     suspend fun upsertQuote(quote: Quote_db)

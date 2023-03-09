@@ -14,7 +14,7 @@ class QuotesRepository @Inject constructor(
     private val quotesDao: QuotesDao
 ) {
 
-    suspend fun refreshDatabase(quotesDataSource: QuotesDataSource) {
+    suspend fun refreshDatabase() {
         val networkQuotesFetch: List<Quote_network> = quotesDataSource.getDailyQuoteListNetwork()
         networkQuotesFetch.forEach {
             quotesDao.upsertQuote(it.toDB())

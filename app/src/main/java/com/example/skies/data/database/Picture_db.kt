@@ -16,14 +16,15 @@ data class Picture_db(
     @ColumnInfo("date") val date: String,
     @ColumnInfo("time") val time: String,
     @ColumnInfo("pic_url") val pic_url: String,
-    @ColumnInfo("likes") val likes: Int
+    @ColumnInfo("likes") val likes: Int,
+    @ColumnInfo("search_term") val search_term: String
 )
 
 @Dao
 interface PicturesDao {
 
     @Query("SELECT * FROM Pictures WHERE :date = date")
-    suspend fun pullPictureByDate(date: String): Flow<List<Picture_db>>
+    fun pullPictureByDate(date: String): Flow<List<Picture_db>>
 
     @Upsert
     suspend fun upsertPicture(pictureDb: Picture_db)

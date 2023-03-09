@@ -73,7 +73,7 @@ fun HostScreen() {
             },
 
         bottomBar = {
-
+            SkiesBottomNavBar()
         },
         snackbarHost = {
             SnackbarHost(hostState = remember { SnackbarHostState() })

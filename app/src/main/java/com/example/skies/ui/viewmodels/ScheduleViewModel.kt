@@ -1,8 +1,5 @@
 package com.example.skies.ui.viewmodels
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.skies.data.database.Task_db
@@ -10,69 +7,63 @@ import com.example.skies.data.repositories.TasksRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+data class ScheduleUiState(
+    val taskList: MutableList<Task_db> = mutableListOf<Task_db>(),
+)
 
 @HiltViewModel
 class ScheduleViewModel @Inject constructor(
     private val tasksRepository: TasksRepository
 ): ViewModel() {
+    private val currentTaskID = MutableStateFlow<Int>(0)
 
-    val uiStateFlow: MutableStateFlow<List<Task_db>> = MutableStateFlow(listOf())
+    private val _scheduleUiState = MutableStateFlow<List<Task_db>>(mutableListOf())
+    val scheduleUiState = _scheduleUiState.asStateFlow()
 
-    init {
-        viewModelScope.launch(Dispatchers.IO) {
-            tasksRepository.pullAllTasksStream().collect {
-                uiStateFlow.value = it
+    private val _taskUiState = MutableStateFlow<Task_db>(Task_db())
+    val taskUiState = _taskUiState.asStateFlow()
+
+    fun getTaskList() =
+            viewModelScope.launch(Dispatchers.IO) {
+                tasksRepository.pullAllTasksStream().collect{
+                    _scheduleUiState.value = it
             }
         }
-    }
-    fun addNewTask(title: String, task: String, date: String, time: String, completed: Boolean) {
-        val newTask = Task_db(
-            id = 0,
-            title = title,
-            task = task,
-            date = date,
-            time = time,
-            completed = completed
-        )
-        viewModelScope.launch(Dispatchers.IO) {
-            tasksRepository.insertTaskInDB(newTask)
 
-            uiStateFlow.value = tasksRepository.pullAllTasks()
-        }
+    init {
+        getTaskList()
     }
 
-    fun editTask(task: Task_db) {
+    fun getTask(id: Int) =
+            viewModelScope.launch(Dispatchers.IO) {
+                _taskUiState.value = tasksRepository.pullTask(id)
+            }
+
+    fun initTask(id: Int) {
+        currentTaskID.value = id
+    }
+
+
+    fun addNewTask(task: Task_db) {
         viewModelScope.launch(Dispatchers.IO) {
-            tasksRepository.editTaskInDB(task = task)
-
-
-            uiStateFlow.value  = tasksRepository.pullAllTasks()
-
+            tasksRepository.insertTaskInDB(task)
         }
     }
 
     fun onTextChange(task: Task_db) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             tasksRepository.upsertTaskToDB(task)
-            tasksRepository.pullAllTasksStream().collect{
-                uiStateFlow.value = it
-            }
         }
     }
 
     fun onDelete(task: Task_db) {
         viewModelScope.launch(Dispatchers.IO) {
-            tasksRepository.deleteTaskinDB(task)
-            uiStateFlow.value = tasksRepository.pullAllTasks()
+            tasksRepository.deleteTaskinDB(task = task)
         }
-
-
     }
 
 

@@ -9,7 +9,7 @@ import javax.inject.Singleton
 
 @Singleton
 @Database(
-    version = 2,
+    version = 1,
     entities = [Quote_db::class, Task_db::class, Picture_db::class],
     exportSchema = true
 )

@@ -1,6 +1,7 @@
 package com.example.skies.data.repositories
 
 import android.content.Context
+import com.example.skies.data.database.ProductivityDao
 import com.example.skies.data.database.Task_db
 import com.example.skies.data.database.TasksDao
 import kotlinx.coroutines.Dispatchers
@@ -11,9 +12,43 @@ import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 @Singleton
-class TasksRepository @Inject constructor(private val tasksDao: TasksDao) {
+class TasksRepository @Inject constructor(
+    private val tasksDao: TasksDao,
+    private val productivityDao: ProductivityDao
+    ) {
 
+    suspend fun incrementTaskImportance(task: Task_db) {
+        tasksDao.updateTask(task = Task_db(
+            id = task.id,
+            title = task.title,
+            date = task.date,
+            time = task.time,
+            completed = task.completed,
+            soft_deleted = task.soft_deleted,
+            score = task.score,
+            importance  = if (task.importance == 5) 1 else task.importance + 1
+        )
+        )
+    }
 
+    suspend fun onTaskCompletion(task: Task_db) {
+        tasksDao.updateTask(task = Task_db(
+            id = task.id,
+            title = task.title,
+            task = task.task,
+            date = task.date,
+            time = task.time,
+            completed = true,
+            soft_deleted = task.soft_deleted,
+            score = task.score + task.importance,
+            importance = task.importance
+        )
+        )
+    }
+
+    suspend fun getTaskProductivity(task: Task_db) {
+        productivityDao.getTaskProductivity(task = task.id)
+    }
 
     suspend fun upsertTaskToDB(task: Task_db) {
         tasksDao.upsertTask(task = task)

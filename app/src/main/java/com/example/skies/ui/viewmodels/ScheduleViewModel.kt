@@ -2,6 +2,7 @@ package com.example.skies.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.skies.data.database.Task_db
 import com.example.skies.data.repositories.TasksRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -63,6 +64,12 @@ class ScheduleViewModel @Inject constructor(
     fun onDelete(task: Task_db) {
         viewModelScope.launch(Dispatchers.IO) {
             tasksRepository.deleteTaskinDB(task = task)
+        }
+    }
+
+    fun incrementTaskImportance(task: Task_db) {
+        viewModelScope.launch {
+            tasksRepository.incrementTaskImportance(task)
         }
     }
 

@@ -6,11 +6,12 @@ import com.example.skies.data.database.Task_db
 
 data class Task_ui(
     val id: Int = 0,
-    val title:String = "",
-    val description:String = "",
-    val date:String = "",
-    val time:String = "",
-    val completed:Boolean = false
+    var title: String = "",
+    var description: String = "",
+    val date: String = "",
+    val time: String = "",
+    var completed: Boolean = false,
+    var score: Int = 0
 )
 
 fun Task_ui.toDB(): Task_db = Task_db(
@@ -19,5 +20,6 @@ fun Task_ui.toDB(): Task_db = Task_db(
     task = description,
     date = date,
     time = time,
-    completed = completed
+    completed = completed,
+    score = score
 )

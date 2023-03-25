@@ -8,11 +8,6 @@ import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,8 +20,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.TextSelectionColors
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -34,20 +27,26 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.KeyboardArrowUp
+import androidx.compose.material.icons.outlined.Send
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
@@ -55,56 +54,108 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.skies.R
-import com.example.skies.data.database.Importance
 import com.example.skies.data.database.Task_db
-import com.example.skies.ui.theme.FadedSky
 import com.example.skies.ui.theme.Immediate
 import com.example.skies.ui.theme.LightGreen
 import com.example.skies.ui.theme.NotImportant
 import com.example.skies.ui.theme.Significant
 import com.example.skies.ui.theme.Sky
 import com.example.skies.ui.theme.SomewhatImportant
+import com.example.skies.ui.theme.TextFieldBackground
 import com.example.skies.ui.theme.Urgent
 import com.example.skies.ui.viewmodels.ScheduleViewModel
-import com.example.skies.ui.viewmodels.TaskViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-@SuppressLint("StateFlowValueCalledInComposition", "UnusedMaterial3ScaffoldPaddingParameter")
+@SuppressLint("StateFlowValueCalledInComposition", "UnusedMaterial3ScaffoldPaddingParameter",
+    "UnusedMaterialScaffoldPaddingParameter"
+)
 @Composable
 fun ScheduleScreen(
-    snackbarHostState: androidx.compose.material.SnackbarHostState,
+    showSnackbar: (String, Color, String?) -> Job,
+    drawerState: DrawerState,
     scheduleViewModel: ScheduleViewModel = hiltViewModel<ScheduleViewModel>()
 ) {
-    val snackbarState: androidx.compose.material.SnackbarHostState = snackbarHostState
     val scope = rememberCoroutineScope()
     val taskListState = scheduleViewModel.scheduleUiState.collectAsState()
+    val snackbarTextColor: MutableState<Color> = remember { mutableStateOf(Sky) }
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            Column() {
+                ModalDrawerSheet() {
 
-    Scaffold(
+                    NavigationDrawerItem(
+                        label = { Text(text = "Daily Aspirations", color = Color.Black) },
+                        selected = false,
+                        onClick = { /*TODO*/ }
+                    )
+                    NavigationDrawerItem(
+                        label = { Text(text = "Check In", color = Color.Black) },
+                        selected = true,
+                        onClick = { /*TODO*/ },
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Outlined.Send,
+                                contentDescription = ""
+                            )
+                        }
+                    )
+                    NavigationDrawerItem(
+                        label = { Text(text = "My Journal", color = Color.Black) },
+                        selected = false,
+                        onClick = { /*TODO*/ }
+                    )
+                }
+            }
+        },
         content = {
-            ScheduleBody(
-                taskList = taskListState,
-                onAddTask = { task -> scheduleViewModel.addNewTask(task) },
-                onTextChange = { task -> scheduleViewModel.onTextChange(task) },
-                onDelete = {
-                        task -> scheduleViewModel.onDelete(task = task)
+            Scaffold(
+                topBar = {
+                    SkiesTopAppBar(
+                        {scope.launch {
+                            drawerState.open()
+                        }
+                        },
+                        "Daily Aspirations"
+                    )
                 },
-                snackbarHostState = snackbarState,
-                fetchTask = { id -> scheduleViewModel.initTask(id) }
+                content = {
+                    ScheduleBody(
+                        taskList = taskListState,
+                        onAddTask = { task -> scheduleViewModel.addNewTask(task) },
+                        onTextChange = { task -> scheduleViewModel.onTextChange(task) },
+                        onDelete = { task ->
+                            scheduleViewModel.onDelete(task = task)
+                        },
+                        displaySnackbar = showSnackbar,
+                        incrementTaskImportance = { task -> scheduleViewModel.incrementTaskImportance(task = task) }
+                    )
+                },
+                bottomBar = {
+                    SkiesBottomNavBar()
+                }
             )
         }
-        )
+    )
+
+
 }
 
 @Composable
@@ -120,19 +171,21 @@ fun ScheduleBody(
     onAddTask: (Task_db) -> Unit,
     onTextChange: (Task_db) -> Unit,
     onDelete: (Task_db) -> Unit,
-    snackbarHostState: SnackbarHostState,
-    fetchTask: (Int) -> Unit
+    displaySnackbar: (String, Color, String?) -> Job,
+    incrementTaskImportance: (Task_db) -> Unit
 ) {
     val scope = rememberCoroutineScope()
 
     LazyColumn(
         modifier = Modifier
-            .padding(10.dp)) {
+            .padding(start = 10.dp, top = 0.dp, bottom = 0.dp, end = 10.dp)) {
+
+            item {Spacer(modifier = Modifier.height(90.dp))}
 
             item{
                 BlankExpandableCard(
                     addNewTask = onAddTask,
-                    snackbarHostState = snackbarHostState
+                    displaySnackbar = displaySnackbar
                 )
                 Spacer(modifier = Modifier.height(20.dp))
                 }
@@ -147,11 +200,13 @@ fun ScheduleBody(
                     task = it,
                     onDelete = onDelete,
                     onTextChange = onTextChange,
-                    snackbarHostState = snackbarHostState,
-                    fetchTask = fetchTask
+                    displaySnackbar = displaySnackbar,
+                    incrementTaskImportance = incrementTaskImportance
                 )
                 Spacer(modifier = Modifier.height(20.dp))
             }
+
+        item {Spacer(modifier = Modifier.height(70.dp))}
         }
 }
 
@@ -163,50 +218,26 @@ fun SkyPic() {
     )
 }
 
-@Composable
-fun ScheduleSnackbar() {
-    Snackbar(
-        content = {  },
-        
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedTransitionTargetStateParameter")
 @Composable
 fun ExpandableCard(
     task: Task_db,
     onTextChange: (Task_db) -> Unit,
     onDelete: (Task_db) -> Unit,
-    snackbarHostState: androidx.compose.material.SnackbarHostState,
-    fetchTask: (Int) -> Unit
+    displaySnackbar: (String, Color, String?) -> Job,
+    incrementTaskImportance: (Task_db) -> Unit
 ) {
     val scope = rememberCoroutineScope()
 
-
-
-//    val entryTask: Task_db = Task_db(
-//        id = task.id,
-//        title = title.value,
-//        task = description.value,
-//        date = date.value,
-//        time = time.value,
-//        completed = completed.value,
-//        importance = importance.value,
-//        soft_deleted = soft_deleted.value
-//    )
-
-
-    val EXPAND_DURATION: Int = 1500
+    val EXPAND_DURATION: Int = 2000
     val cardExpandedBackgroundColor: Color = Color.White
     val cardCollapsedBackgroundColor: Color = Sky
     val iconExpanded: Color = Sky
     val iconCollapsed: Color = Color.White
     val cardContentColor: Color = Color.Black
+    val taskImportance = remember { mutableStateOf(task.importance) }
     val expanded = remember { mutableStateOf(false) }
-    val priority = remember { mutableStateOf(0) }
-//    val shadowExpandedColor: Color = DarkGreen
-//    val shadowCollapsedColor: Color = Color.Black
 
     val transitionState = remember {
         MutableTransitionState(expanded.value).apply {
@@ -227,11 +258,6 @@ fun ExpandableCard(
         if (expanded.value) iconExpanded else iconCollapsed
     }
 
-//    val cardPaddingHorizontal by transition.animateDp(
-//        { tween(durationMillis = EXPAND_DURATION) }
-//    ) {
-//        if (expanded.value) 48.dp else 24.dp
-//    }
     val cardElevation by transition.animateDp({
         tween(durationMillis = EXPAND_DURATION)
     }) {
@@ -269,38 +295,38 @@ fun ExpandableCard(
             NotImportant, SomewhatImportant, Significant, Urgent, Immediate
         )
             val title = remember { mutableStateOf(task.title) }
+            val focusRequester = remember { FocusRequester() }
             TextField(
                 modifier = Modifier
-                    .background(color = FadedSky),
+                    .focusRequester(focusRequester)
+                    .onFocusEvent {
+                        if (it.isFocused) {
+                            expanded.value = true
+                        } else {
+                            expanded.value = false
+                        }
+                    },
                 value = title.value,
                 onValueChange = {
                     title.value = it
-                    expanded.value = true
                     onTextChange(Task_db(id = task.id,title=it))
                 },
                 colors = TextFieldDefaults.textFieldColors(
-                    selectionColors = TextSelectionColors(
-                        backgroundColor = Sky,
-                        handleColor = Color.Black
-                    ),
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent
+                    containerColor = TextFieldBackground,
+                    unfocusedTextColor = Color.White
                 ),
                 placeholder = { Text(text = task.title)},
                 leadingIcon = {
                     IconButton(
                         onClick = {
-                                if (priority.value >= 4) {
-                                    priority.value = 0
-                                } else {
-                                    priority.value++
-                                }
+                                incrementTaskImportance(task)
                             },
-                        colors = IconButtonDefaults.iconButtonColors(contentColor = priorityList[priority.value]),
+                        colors = IconButtonDefaults.iconButtonColors(contentColor = priorityList[taskImportance.value]),
                         content = {
                             Icon(
                                 painter = painterResource(id = R.drawable.baseline_task_alt_24),
-                                contentDescription = ""
+                                contentDescription = "",
+                                tint = priorityList[task.importance-1]
                             )
                         }
                     )
@@ -313,9 +339,7 @@ fun ExpandableCard(
                 IconButton(onClick = {
                     onDelete(task)
                         scope.launch(Dispatchers.IO) {
-                            snackbarHostState.showSnackbar(
-                                "${title.value} has been unscheduled"
-                            )
+
                         }
                     }
                  ) {
@@ -338,23 +362,26 @@ fun ExpandableCard(
             }
 
         }
+        
+        AnimatedVisibility(visible = expanded.value) {
+            ExpandedContent(
+                task = task,
+                onTextChange = {it -> onTextChange(it) }
+            )
+        }
 
-        ExpandedContent(
-            visibility = expanded,
-            task = task,
-            onTextChange = {it -> onTextChange(it) }
-        )
+
 
     }
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalTextApi::class)
 @SuppressLint("UnusedTransitionTargetStateParameter")
 @Composable
 fun BlankExpandableCard(
     addNewTask: (Task_db) -> Unit,
-    snackbarHostState: androidx.compose.material.SnackbarHostState
+    displaySnackbar: (String, Color, String?) -> Job
 ) {
     val scope = rememberCoroutineScope()
 
@@ -412,12 +439,21 @@ fun BlankExpandableCard(
 
 
     ) {
+        val focusRequester = FocusRequester()
         val titleText = remember { mutableStateOf("") }
             TextField(
                 modifier = Modifier
                     .border(width = 0.dp, color = Color.Transparent, shape = RectangleShape)
                     .clipToBounds()
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .focusRequester(focusRequester)
+                    .onFocusEvent {
+                        if (it.isFocused) {
+                            expanded.value = true
+                        } else {
+                            expanded.value = false
+                        }
+                    },
                 value = titleText.value,
                 onValueChange = {
                     titleText.value = it
@@ -425,32 +461,26 @@ fun BlankExpandableCard(
                 },
                 placeholder = { Text(text = "Schedule an event!") },
                 colors = TextFieldDefaults.textFieldColors(
-                    selectionColors = TextSelectionColors(
-                        backgroundColor = Sky,
-                        handleColor = Color.Black
-                    ),
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent
+                    containerColor = TextFieldBackground,
+                    unfocusedTextColor = Color.White
                 ),
                 leadingIcon = {
                     Icon(
                         painter = painterResource(id = R.drawable.twotone_add_task_24),
                         contentDescription = "",
-                        tint = LightGreen
+                        tint = iconColor
                     )
                 }
             )
         Row() {
-
+//
 
             IconButton(onClick = {
+                val temp = titleText.value
                 expanded.value = false
-                addNewTask(Task_db(title = titleText.value))
-                scope.launch(Dispatchers.IO) {
-                    snackbarHostState.showSnackbar(
-                        message = "${titleText.value} has been scheduled!"
-                    )
-                }
+                titleText.value = ""
+                addNewTask(Task_db(title = temp))
+                ImeAction.Send
             }
             ) {
                 Icon(
@@ -471,14 +501,13 @@ fun BlankExpandableCard(
                     )
                 }
             }
-        
 
 
 
 
-        BlankExpandedContent(
-            visibility = expanded
-        )
+        AnimatedVisibility(visible = expanded.value) {
+            BlankExpandedContent()
+        }
     }
 
 }
@@ -489,36 +518,10 @@ fun BlankExpandableCard(
 @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ExpandedContent(
-    visibility: MutableState<Boolean>,
     task: Task_db,
     onTextChange: (Task_db) -> Unit
 ) {
-    val visible = MutableTransitionState(visibility.value)
-    val EXPANSION_DURATION: Int = 1500
-    val enterTransition = remember {
-        expandVertically(
-            expandFrom = Alignment.Top,
-            animationSpec = tween(EXPANSION_DURATION)
-        ) + fadeIn(
-            initialAlpha = 0.3f,
-            animationSpec = tween(EXPANSION_DURATION)
-        )
-    }
-    val exitTransition = remember {
-        shrinkVertically(
-            // Expand from the top.
-            shrinkTowards = Alignment.Top,
-            animationSpec = tween(EXPANSION_DURATION)
-        ) + fadeOut(
-            // Fade in with the initial alpha of 0.3f.
-            animationSpec = tween(EXPANSION_DURATION)
-        )
-    }
-    AnimatedVisibility(
-        visibleState = visible,
-        enter = enterTransition,
-        exit = exitTransition,
-    ) {
+
             Column {
                 Divider(Modifier.height(1.dp))
                 TextField(
@@ -573,41 +576,11 @@ fun ExpandedContent(
                 )
 
             }
-    }
 }
 
     @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
     @Composable
-    fun BlankExpandedContent(
-        visibility: MutableState<Boolean>,
-
-    ) {
-        val visible = MutableTransitionState(visibility.value)
-        val EXPANSION_DURATION: Int = 1500
-        val enterTransition = remember {
-            expandVertically(
-                expandFrom = Alignment.Top,
-                animationSpec = tween(EXPANSION_DURATION)
-            ) + fadeIn(
-                initialAlpha = 0.3f,
-                animationSpec = tween(EXPANSION_DURATION)
-            )
-        }
-        val exitTransition = remember {
-            shrinkVertically(
-                // Expand from the top.
-                shrinkTowards = Alignment.Top,
-                animationSpec = tween(EXPANSION_DURATION)
-            ) + fadeOut(
-                // Fade in with the initial alpha of 0.3f.
-                animationSpec = tween(EXPANSION_DURATION)
-            )
-        }
-        AnimatedVisibility(
-            visibleState = visible,
-            enter = enterTransition,
-            exit = exitTransition,
-        ) {
+    fun BlankExpandedContent() {
 
             Column {
                 Divider(Modifier.height(1.dp))
@@ -619,12 +592,7 @@ fun ExpandedContent(
                     value = "Testing",
                     onValueChange = {},
                     colors = TextFieldDefaults.textFieldColors(
-                        selectionColors = TextSelectionColors(
-                            backgroundColor = Sky,
-                            handleColor = Color.Black
-                        ),
-                        unfocusedIndicatorColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent
+                        containerColor = TextFieldBackground
                     )
                 )
                 Divider(Modifier.height(1.dp))
@@ -635,12 +603,7 @@ fun ExpandedContent(
                     value = "Test2",
                     onValueChange = {},
                     colors = TextFieldDefaults.textFieldColors(
-                        selectionColors = TextSelectionColors(
-                            backgroundColor = Sky,
-                            handleColor = Color.Black
-                        ),
-                        unfocusedIndicatorColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent
+                        containerColor = TextFieldBackground
                     )
                 )
                 Divider(Modifier.height(1.dp))
@@ -651,16 +614,10 @@ fun ExpandedContent(
                     value = "Test3",
                     onValueChange = {},
                     colors = TextFieldDefaults.textFieldColors(
-                        selectionColors = TextSelectionColors(
-                            backgroundColor = Sky,
-                            handleColor = Color.Black
-                        ),
-                        unfocusedIndicatorColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent
+                        containerColor = TextFieldBackground
                     )
                 )
             }
-        }
     }
 
 

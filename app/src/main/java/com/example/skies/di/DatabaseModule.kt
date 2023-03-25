@@ -3,6 +3,7 @@ package com.example.skies.di
 import android.content.Context
 import androidx.room.Room
 import com.example.skies.data.database.PicturesDao
+import com.example.skies.data.database.ProductivityDao
 import com.example.skies.data.database.QuotesDao
 import com.example.skies.data.database.SkiesDatabase
 import com.example.skies.data.database.TasksDao
@@ -16,6 +17,12 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 @Module
 object DatabaseModule {
+
+    @Singleton
+    @Provides
+    fun providesProductivityDao(database: SkiesDatabase): ProductivityDao {
+        return database.productivityDao()
+    }
 
     @Singleton
     @Provides

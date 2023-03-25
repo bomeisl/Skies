@@ -24,3 +24,6 @@ val SomewhatImportant = Color(0xFF9575CD)
 val Significant = Color(0xFFFFF176)
 val Urgent = Color(0xFFFFB74D)
 val Immediate = Color(0xFFF06292)
+
+val TextFieldBackground = Color(0x17000000)
+

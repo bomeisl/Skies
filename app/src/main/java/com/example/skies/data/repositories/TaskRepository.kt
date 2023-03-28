@@ -58,6 +58,22 @@ class TasksRepository @Inject constructor(
         tasksDao.updateTask(task = task)
     }
 
+    suspend fun updateTitleInDB(title: String, id: Int) {
+        tasksDao.updateTitle(title = title, id = id)
+    }
+
+    suspend fun updateTaskInDB(task: String, id: Int) {
+        tasksDao.updateTask(task = task, id = id)
+    }
+
+    suspend fun updateDateInDB(date: String, id: Int) {
+        tasksDao.updateDate(date = date, id = id)
+    }
+
+    suspend fun updateTimeInDB(time: String, id: Int) {
+        tasksDao.updateTime(time = time, id = id)
+    }
+
     suspend fun insertTaskInDB(task: Task_db) {
         tasksDao.insertTask(task = task)
     }

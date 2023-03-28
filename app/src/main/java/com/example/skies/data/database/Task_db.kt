@@ -63,4 +63,16 @@ interface TasksDao{
     @Delete
     suspend fun deleteTask(task: Task_db)
 
+    @Query("UPDATE Tasks SET title=:title WHERE id=:id")
+    suspend fun updateTitle(title: String, id: Int)
+
+    @Query("UPDATE Tasks SET task=:task WHERE id=:id")
+    suspend fun updateTask(task: String, id: Int)
+
+    @Query("UPDATE Tasks SET date=:date WHERE id=:id")
+    suspend fun updateDate(date: String, id: Int)
+
+    @Query("UPDATE Tasks SET time=:time WHERE id=:id")
+    suspend fun updateTime(time: String, id: Int)
+
 }
